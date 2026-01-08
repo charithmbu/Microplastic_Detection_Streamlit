@@ -1,13 +1,14 @@
 import streamlit as st
-import cv2
 import numpy as np
 import matplotlib.pyplot as plt
 import os
 from ultralytics import YOLO
+from PIL import Image
+import io
 
 # ---------------- CONFIG ----------------
 MODEL_PATH = "Microplastic_Yolov8_Model.pt"
-EXAMPLE_DIR = "example_images"
+EXAMPLE_DIR = "Example_images"
 PIXEL_TO_NM = 100
 RISK_THRESHOLD = 15
 
@@ -30,20 +31,23 @@ img = None
 # ---------------- CAMERA INPUT ----------------
 if input_mode == "Capture from Camera":
     camera_image = st.camera_input("Capture image from microscope / camera")
-
     if camera_image:
-        img_bytes = np.frombuffer(camera_image.read(), np.uint8)
-        img = cv2.imdecode(img_bytes, cv2.IMREAD_COLOR)
-        st.image(img, channels="BGR", caption="Captured Image")
+        img = Image.open(camera_image).convert("RGB")
+        img = np.array(img)
+        st.image(img, caption="Captured Image")
 
 # ---------------- EXAMPLE IMAGE ----------------
 elif input_mode == "Use Example Image":
-    example_images = sorted(os.listdir(EXAMPLE_DIR))
-    selected_image = st.selectbox("Select an example image:", example_images)
+    if not os.path.exists(EXAMPLE_DIR):
+        st.error("Example images folder not found.")
+    else:
+        example_images = sorted(os.listdir(EXAMPLE_DIR))
+        selected_image = st.selectbox("Select an example image:", example_images)
 
-    img_path = os.path.join(EXAMPLE_DIR, selected_image)
-    img = cv2.imread(img_path)
-    st.image(img, channels="BGR", caption=f"Example Image: {selected_image}")
+        img_path = os.path.join(EXAMPLE_DIR, selected_image)
+        img = Image.open(img_path).convert("RGB")
+        img = np.array(img)
+        st.image(img, caption=f"Example Image: {selected_image}")
 
 # ---------------- UPLOAD IMAGE ----------------
 else:
@@ -51,11 +55,10 @@ else:
         "Upload Microscopic Image",
         type=["jpg", "jpeg", "png"]
     )
-
     if uploaded_file:
-        img_bytes = np.frombuffer(uploaded_file.read(), np.uint8)
-        img = cv2.imdecode(img_bytes, cv2.IMREAD_COLOR)
-        st.image(img, channels="BGR", caption="Uploaded Image")
+        img = Image.open(uploaded_file).convert("RGB")
+        img = np.array(img)
+        st.image(img, caption="Uploaded Image")
 
 # ---------------- YOLO PROCESSING ----------------
 if img is not None:
@@ -64,13 +67,12 @@ if img is not None:
     total_count = len(boxes)
 
     annotated = results[0].plot()
-    st.image(annotated, channels="BGR", caption="Detected Microplastics")
+    st.image(annotated, caption="Detected Microplastics")
 
     st.subheader("📊 Detection Summary")
     st.write(f"Total Microplastics Detected: **{total_count}**")
 
     sizes_nm = []
-
     st.subheader("📐 Individual Microplastic Sizes (nm)")
 
     for i, box in enumerate(boxes, start=1):
