@@ -67,7 +67,7 @@ if img_bytes is not None:
         response = requests.post(
             API_URL,
             files={"file": ("image.jpg", img_bytes, "image/jpeg")},
-            timeout=60
+            timeout=100
         )
     except Exception as e:
         st.error("❌ Could not connect to Detection API")
