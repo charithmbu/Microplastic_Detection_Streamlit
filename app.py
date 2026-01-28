@@ -109,3 +109,4 @@ if img_bytes:
         ax.set_ylabel("Count")
         st.pyplot(fig)
 #This is updated
+#The output image width is updated
