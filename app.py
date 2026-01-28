@@ -69,7 +69,7 @@ if img_bytes:
     if "annotated_image" in data:
         decoded = base64.b64decode(data["annotated_image"])
         annotated_img = Image.open(io.BytesIO(decoded))
-        st.image(annotated_img, caption="Detected Microplastics", use_column_width=True)
+        st.image(annotated_img, caption="Detected Microplastics", width = 600)
 
     # -------- SUMMARY --------
     total_count = data["total_count"]
