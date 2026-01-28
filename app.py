@@ -108,3 +108,4 @@ if img_bytes:
         ax.bar(["Min", "Avg", "Max"], [min_count, avg_count, max_count])
         ax.set_ylabel("Count")
         st.pyplot(fig)
+#This is updated
